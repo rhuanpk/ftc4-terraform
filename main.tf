@@ -95,12 +95,16 @@ module "app_client_deployment" {
   labels_app     = "app-client"
   replicas       = 1
   container_name = "app-client"
-  image          = "filipeborba/app-client:latest"
+  image          = "filipeborba/app-client:v2"
   container_port = 8080
   env_vars = {
-    "JAVA_APP_URL" = {
-      name  = "JAVA_APP_URL"
-      value = "http://java-app-java-app:8080"
+    "SPRING_DATA_MONGODB_URI" = {
+      name  = "SPRING_DATA_MONGODB_URI"
+      value = var.mongodb_uri
+    }
+    "SPRING_DATA_MONGODB_DATABASE" = {
+      name  = "SPRING_DATA_MONGODB_DATABASE"
+      value = var.mongodb_database
     }
   }
   resource_limits_cpu      = "1"
@@ -120,12 +124,20 @@ module "app_product_deployment" {
   labels_app     = "app-product"
   replicas       = 1
   container_name = "app-product"
-  image          = "filipeborba/app-product:latest"
-  container_port = 8081
+  image          = "filipeborba/app-product:v2"
+  container_port = 8080
   env_vars = {
-    "JAVA_APP_URL" = {
-      name  = "JAVA_APP_URL"
-      value = "http://java-app-java-app:8080"
+    "SPRING_DATASOURCE_URL" = {
+      name  = "SPRING_DATASOURCE_URL"
+      value = var.mysql_product_uri
+    }
+    "SPRING_DATASOURCE_USERNAME" = {
+      name  = "SPRING_DATASOURCE_USERNAME"
+      value = var.mysql_user
+    }
+    "SPRING_DATASOURCE_PASSWORD" = {
+      name  = "SPRING_DATASOURCE_PASSWORD"
+      value = var.mysql_password
     }
   }
   resource_limits_cpu      = "1"
@@ -133,34 +145,9 @@ module "app_product_deployment" {
   resource_requests_cpu    = "500m"
   resource_requests_memory = "256Mi"
   restart_policy           = "Always"
-  port                     = 8081
-  target_port              = 8081
-  application_port         = 4001
-}
-
-module "app_payment_deployment" {
-  source         = "./modules/app-payment"
-  name           = "app-payment"
-  namespace      = "app-payment"
-  labels_app     = "app-payment"
-  replicas       = 1
-  container_name = "app-payment"
-  image          = "filipeborba/app-payment:latest"
-  container_port = 8082
-  env_vars = {
-    "JAVA_APP_URL" = {
-      name  = "JAVA_APP_URL"
-      value = "http://java-app-java-app:8080"
-    }
-  }
-  resource_limits_cpu      = "1"
-  resource_limits_memory   = "1Gi"
-  resource_requests_cpu    = "500m"
-  resource_requests_memory = "256Mi"
-  restart_policy           = "Always"
-  port                     = 8082
-  target_port              = 8082
-  application_port         = 4002
+  port                     = 8080
+  target_port              = 8080
+  application_port         = 4000
 }
 
 module "app_order_deployment" {
@@ -170,12 +157,20 @@ module "app_order_deployment" {
   labels_app     = "app-order"
   replicas       = 1
   container_name = "app-order"
-  image          = "filipeborba/app-order:latest"
-  container_port = 8083
+  image          = "filipeborba/app-order:v2"
+  container_port = 8080
   env_vars = {
-    "JAVA_APP_URL" = {
-      name  = "JAVA_APP_URL"
-      value = "http://java-app-java-app:8080"
+    "MYSQL_URI" = {
+      name  = "MYSQL_URI"
+      value = var.mysql_order_uri
+    }
+    "MYSQL_USER" = {
+      name  = "MYSQL_USER"
+      value = var.mysql_user
+    }
+    "MYSQL_PASSWORD" = {
+      name  = "MYSQL_PASSWORD"
+      value = var.mysql_password
     }
   }
   resource_limits_cpu      = "1"
@@ -183,7 +178,47 @@ module "app_order_deployment" {
   resource_requests_cpu    = "500m"
   resource_requests_memory = "256Mi"
   restart_policy           = "Always"
-  port                     = 8083
-  target_port              = 8083
-  application_port         = 4003
+  port                     = 8080
+  target_port              = 8080
+  application_port         = 4000
 }
+
+module "app_payment_deployment" {
+  source         = "./modules/app-payment"
+  name           = "app-payment"
+  namespace      = "app-payment"
+  labels_app     = "app-payment"
+  replicas       = 1
+  container_name = "app-payment"
+  image          = "filipeborba/app-payment:v2"
+  container_port = 8080
+  env_vars = {
+    "MYSQL_URI" = {
+      name  = "MYSQL_URI"
+      value = var.mysql_payment_uri
+    }
+    "MYSQL_USER" = {
+      name  = "MYSQL_USER"
+      value = var.mysql_user
+    }
+    "MYSQL_PASSWORD" = {
+      name  = "MYSQL_PASSWORD"
+      value = var.mysql_password
+    }
+    "URL_API_ORDER" = {
+      name  = "URL_API_ORDER"
+      value = "http://${module.app_order_deployment.app_order_loadbalancer_hostname}:4000/"
+    }
+  }
+  resource_limits_cpu      = "1"
+  resource_limits_memory   = "1Gi"
+  resource_requests_cpu    = "500m"
+  resource_requests_memory = "256Mi"
+  restart_policy           = "Always"
+  port                     = 8080
+  target_port              = 8080
+  application_port         = 4000
+  depends_on               = [module.app_order_deployment]
+}
+
+

@@ -18,3 +18,8 @@ resource "kubernetes_namespace" "app-product" {
     name = "app-product"
   }
 }
+resource "kubernetes_namespace" "mongodb" {
+  metadata {
+    name = "mongodb"
+  }
+}

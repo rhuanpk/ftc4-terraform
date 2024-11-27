@@ -82,6 +82,10 @@ resource "kubernetes_service" "app_order_service_load_balancer" {
   }
 }
 
+output "app_order_loadbalancer_hostname" {
+  value = kubernetes_service.app_order_service_load_balancer.status[0].load_balancer[0].ingress[0].hostname
+}
+
 resource "kubernetes_service" "app_order" {
   metadata {
     name      = var.name
@@ -127,9 +131,9 @@ module "app_order_pdb" {
 
 module "app_order_replicaset" {
   source                   = "./replicaset"
-  name                     = var.name
+  name                     = "${var.name}-replicaset"
   namespace                = var.namespace
-  labels_app               = var.labels_app
+  labels_app               = "${var.labels_app}-replicaset"
   replicas                 = 2
   container_name           = var.container_name
   image                    = var.image

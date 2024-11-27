@@ -4,9 +4,9 @@ resource "aws_eks_node_group" "this" {
   node_role_arn   = var.node_role_arn
   subnet_ids      = var.subnet_ids
   scaling_config {
-    desired_size = 3
-    max_size     = 4
-    min_size     = 2
+    desired_size = 6
+    max_size     = 10
+    min_size     = 4
   }
   instance_types = ["t2.medium"]
 }

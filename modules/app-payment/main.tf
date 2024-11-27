@@ -127,9 +127,9 @@ module "app_payment_pdb" {
 
 module "app_payment_replicaset" {
   source                   = "./replicaset"
-  name                     = var.name
+  name                     = "${var.name}-replicaset"
   namespace                = var.namespace
-  labels_app               = var.labels_app
+  labels_app               = "${var.labels_app}-replicaset"
   replicas                 = 2
   container_name           = var.container_name
   image                    = var.image
