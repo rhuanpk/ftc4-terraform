@@ -85,7 +85,8 @@ data "aws_eks_cluster_auth" "cluster_auth" {
 }
 
 module "namespace" {
-  source = "./modules/namespaces"
+  source     = "./modules/namespaces"
+  depends_on = [module.eks_cluster]
 }
 
 module "app_client_deployment" {
