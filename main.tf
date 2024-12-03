@@ -85,7 +85,8 @@ data "aws_eks_cluster_auth" "cluster_auth" {
 }
 
 module "namespace" {
-  source = "./modules/namespaces"
+  source     = "./modules/namespaces"
+  depends_on = [module.eks_cluster]
 }
 
 module "app_client_deployment" {
@@ -115,6 +116,7 @@ module "app_client_deployment" {
   port                     = 8080
   target_port              = 8080
   application_port         = 4000
+  depends_on               = [module.namespace]
 }
 
 module "app_product_deployment" {
@@ -148,6 +150,7 @@ module "app_product_deployment" {
   port                     = 8080
   target_port              = 8080
   application_port         = 4000
+  depends_on               = [module.namespace]
 }
 
 module "app_order_deployment" {
@@ -181,6 +184,7 @@ module "app_order_deployment" {
   port                     = 8080
   target_port              = 8080
   application_port         = 4000
+  depends_on               = [module.namespace]
 }
 
 module "app_payment_deployment" {
@@ -218,7 +222,7 @@ module "app_payment_deployment" {
   port                     = 8080
   target_port              = 8080
   application_port         = 4000
-  depends_on               = [module.app_order_deployment]
+  depends_on               = [module.namespace, module.app_order_deployment]
 }
 
 
